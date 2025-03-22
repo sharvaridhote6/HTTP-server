@@ -1,14 +1,11 @@
 {
-    "name": "@codecrafters/build-your-own-http-server",
+    "name": "server",
     "version": "1.0.0",
-    "description": "Build your own HTTP-Server challenge, from CodeCrafters",
+    "description": "",
     "main": "main.js",
     "scripts": {
         "dev": "node app/main.js"
     },
-    "keywords": [
-        "build-your-own-x"
-    ],
     "author": "",
     "license": "MIT",
     "dependencies": {}

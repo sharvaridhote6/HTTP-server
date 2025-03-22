@@ -33,6 +33,8 @@ const server = net.createServer((socket) => { //create a TCP server and pass a c
 
 }); 
 
-server.listen(4221, "localhost");
+server.listen(4221, "localhost",()=>{
+  console.log("Server running on localhost:4221");
+});
 
 
