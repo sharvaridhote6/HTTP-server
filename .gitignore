@@ -1,1 +1,6 @@
 node_modules/
+.gitattributes
+.gitignore
+.gitmodules
+.gitconfig
+.git/
