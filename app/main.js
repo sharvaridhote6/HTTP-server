@@ -6,10 +6,23 @@ const server = net.createServer((socket) => { //create a TCP server and pass a c
     socket.on("data",(data)=>{ //log incoming data /requests from the client
     console.log(data.toString()); //convert the data to a string
 
-    const response="HTTP/1.1 200 OK\r\n\r\n"; //HTTP response header
-    socket.write(response); //write the response to the client
-    socket.end(); //close the connection
-  })
+    const firstLine = data.toString().split("\r\n")[0]; 
+
+    // Extract the path from the request
+    const path = firstLine.split(" ")[1];  // Extracts the path part (e.g., `/` or `/unknown`)
+
+    // Determine the response based on the requested path
+    let response;
+    if (path === "/") {
+      response = "HTTP/1.1 200 OK\r\n\r\n";
+    } else {
+      response = "HTTP/1.1 404 Not Found\r\n\r\n";
+    }
+
+    // Send the response to the client
+    socket.write(response);
+    socket.end(); //closes the connection
+  });
     socket.on("close", () => { //listens for the close event which happens when the client disconnects\
     console.log("Client disconnected");
   });
