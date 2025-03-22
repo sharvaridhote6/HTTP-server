@@ -18,7 +18,7 @@ const server = net.createServer((socket) => { //create a TCP server and pass a c
     console.error(`Socket error: ${err.message}`);
   });
 
-});
+}); 
 
 server.listen(4221, "localhost");
 
