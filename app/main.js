@@ -1,9 +1,10 @@
 const net = require("net"); //allows you to create a tcp server and manage socket connections, this net module is built into Node.js
 
 const server = net.createServer((socket) => { //create a TCP server and pass a callback function that will be called whenever a new connection is made to the server, and socket parameter represents each individual client that connects to the server
-  socket.on("data",(data)=>{
-    //log incoming data /requests from the client
-    console.log(data.toString());
+  console.log("Client connected");
+
+    socket.on("data",(data)=>{ //log incoming data /requests from the client
+    console.log(data.toString()); //convert the data to a string
 
     const response="HTTP/1.1 200 OK\r\n\r\n"; //HTTP response header
     socket.write(response); //write the response to the client
@@ -11,6 +12,10 @@ const server = net.createServer((socket) => { //create a TCP server and pass a c
   })
     socket.on("close", () => { //listens for the close event which happens when the client disconnects\
     console.log("Client disconnected");
+  });
+
+  socket.on("error", (err) => { //handles errors on the socket
+    console.error(`Socket error: ${err.message}`);
   });
 
 });
