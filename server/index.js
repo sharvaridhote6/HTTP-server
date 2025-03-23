@@ -1,15 +1,16 @@
-const net = require("net");
+const net = require("net"); // Import the net module
 
-const server = net.createServer((socket) => {
+const server = net.createServer((socket) => { // Create a new server
   console.log("Client connected");
 
-  socket.on("data", (data) => {
-    const request = data.toString();
-    console.log(`Received:\n${request}`);
+  socket.on("data", (data) => { // Listen for data from the client
+    const request = data.toString();// Convert the data to a string
+    console.log(`Received:\n${request}`);// Log the request
 
-    const [requestLine] = request.split("\r\n");
-    const [method, path] = requestLine.split(" ");
-
+    const [requestLine] = request.split("\r\n"); //parse the request line
+    const [method, path] = requestLine.split(" "); // Extract the method and path from the request
+ 
+    // Check if the request is a GET request and the path starts with /echo/
     if (method === "GET" && path.startsWith("/echo/")) {
       const echoStr = path.replace("/echo/", "");
 
