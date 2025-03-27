@@ -1,84 +1,87 @@
-const net = require("net"); // Import the net module
-const fs= require("fs"); // Import the fs module
-const path = require("path"); // Import the path module
+const net = require("net");                 // Import net module to create TCP server
+const fs = require("fs");                   // Import file system module
+const path = require("path");               // Import path module
 
-let connectionCounter= 0;
-
-const server = net.createServer((socket) => { // Create a new server
-  const clientId = ++connectionCounter;   // Assign unique ID to each client
+const server = net.createServer((socket) => {
   console.log("Client connected");
 
-  socket.on("data", (data) => { // Listen for data from the client
-    const request = data.toString();// Convert the data to a string
-    console.log(`Client ${clientId} - Received:\n${request}`);
+  let requestData = "";                     // Store incoming data chunks
 
-    const [requestLine] = request.split("\r\n"); //parse the request line
-    const [method, path] = requestLine.split(" "); // Extract the method and path from the request
-    
-     const headers = headerLines.reduce((acc, line) => { // Parse headers into an object w key-value pairs through reduce method and acc is the accumulator used to store the key-value pairs
-      const [key, value] = line.split(": "); // Split the header into key and value
-      if (key && value) {
-        acc[key.toLowerCase()] = value; // Convert the key to lowercase
-      }
-      return acc;
-    }, {});
+  // 🔥 Listen for data from the client whenever client sends a req
+  socket.on("data", (data) => {
+    requestData += data.toString();         // Append incoming data
+  });
 
-   
-    // Handle /user-agent endpoint
-    if (method === "GET" && path === "/user-agent") {
-      const userAgent = headers["user-agent"] || "Unknown"; // extract the User-Agent header or use "Unknown" if it's not present
+  socket.on("end", () => {
+    console.log(`Received:\n${requestData}`);
 
-      const responseBody = userAgent; // Use the User-Agent header as the body
-      const contentLength = Buffer.byteLength(responseBody);
+    // ✅ Split request into header and body
+    const [header, body] = requestData.split("\r\n\r\n");
 
-      const response = `HTTP/1.1 200 OK\r\n` +
-        `Content-Type: text/plain\r\n` +
-        `Content-Length: ${contentLength}\r\n` +
-        `\r\n` +
-        `${responseBody}`;
+    // ✅ Parse the request line and headers
+    const [requestLine, ...headerLines] = header.split("\r\n");
+    const [method, path] = requestLine.split(" ");
 
-      socket.write(response);
-    }
+    // ✅ Handle POST /files/{filename}
+    if (method === "POST" && path.startsWith("/files/")) {
+      const filename = path.replace("/files/", "");
+      const filePath = path.join("/tmp", filename);
 
-    // Handle /echo/{str} endpoint
-    else if (method === "GET" && path.startsWith("/echo/")) {
-      const echoStr = path.replace("/echo/", ""); // Extract the echo string
+      // Write the body content to the file
+      fs.writeFile(filePath, body, (err) => {
+        if (err) {
+          console.error("File write error:", err);
+          const response = "HTTP/1.1 500 Internal Server Error\r\n\r\n";
+          socket.write(response);
+        } else {
+          console.log(`File created: ${filePath}`);
+          const response = "HTTP/1.1 201 Created\r\n\r\n";
+          socket.write(response);
+        }
+        socket.end();
+      });
 
-      const responseBody = echoStr;
-      const contentLength = Buffer.byteLength(responseBody); 
-
-      const response = `HTTP/1.1 200 OK\r\n` +
-        `Content-Type: text/plain\r\n` +
-        `Content-Length: ${contentLength}\r\n` +
-        `\r\n` +
-        `${responseBody}`;
-
-      socket.write(response);
     } 
-    // Handle root path
-    else if (method === "GET" && path === "/") {
-      const response = "HTTP/1.1 200 OK\r\n\r\n";
-      socket.write(response);
+    // ✅ Handle GET /files/{filename}
+    else if (method === "GET" && path.startsWith("/files/")) {
+      const filename = path.replace("/files/", "");
+      const filePath = path.join("/tmp", filename);
+
+      fs.readFile(filePath, (err, data) => {
+        if (err) {
+          const response = "HTTP/1.1 404 Not Found\r\n\r\n";
+          socket.write(response);
+        } else {
+          const response = `HTTP/1.1 200 OK\r\n` +
+            `Content-Type: application/octet-stream\r\n` +
+            `Content-Length: ${data.length}\r\n\r\n` +
+            data;
+          socket.write(response);
+        }
+        socket.end();
+      });
+
     } 
-    // Handle unknown paths
+    // ✅ Handle invalid paths
     else {
       const response = "HTTP/1.1 404 Not Found\r\n\r\n";
       socket.write(response);
+      socket.end();
     }
+  });
 
-    socket.end(); // Close the connection after sending the response
+  // ✅ Handle errors
+  socket.on("error", (err) => {
+    console.error(`Socket error: ${err.message}`);
   });
 
   socket.on("close", () => {
     console.log("Client disconnected");
   });
-
-  socket.on("error", (err) => {
-    console.error(`Socket error: ${err.message}`);
-  });
 });
 
-// Start the server on port 4221
-server.listen(4221, "localhost", () => {
-  console.log("Server is running on localhost:4221");
+// ✅ Start server
+const PORT = 4221;
+server.listen(PORT, "localhost", () => {
+  console.log(`Server running at http://localhost:${PORT}`);
 });
