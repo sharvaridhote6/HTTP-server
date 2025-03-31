@@ -5,7 +5,7 @@ const path = require("path");               // Import path module
 const server = net.createServer((socket) => {
   console.log("Client connected");
 
-  let requestData = "";                     // Store incoming data chunks
+  let requestData = "";  // Variable to store incoming data
 
   // 🔥 Listen for data from the client whenever client sends a req
   socket.on("data", (data) => {
