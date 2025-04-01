@@ -53,7 +53,7 @@ const server = net.createServer((socket) => {
           socket.write(response);
         } else {
           const response = `HTTP/1.1 200 OK\r\n` +
-            `Content-Type: application/octet-stream\r\n` +
+            `Content-Type: application/octet-stream\r\n` + 
             `Content-Length: ${data.length}\r\n\r\n` +
             data;
           socket.write(response);
