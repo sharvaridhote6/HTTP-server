@@ -7,7 +7,7 @@ const server = net.createServer((socket) => {
 
   let requestData = "";  // Variable to store incoming data
 
-  // 🔥 Listen for data from the client whenever client sends a req
+  // Listen for data from the client whenever client sends a req
   socket.on("data", (data) => {
     requestData += data.toString();         // Append incoming data
   });
@@ -15,14 +15,14 @@ const server = net.createServer((socket) => {
   socket.on("end", () => {
     console.log(`Received:\n${requestData}`);
 
-    // ✅ Split request into header and body
+    // Split request into header and body
     const [header, body] = requestData.split("\r\n\r\n");
 
-    // ✅ Parse the request line and headers
+    // Parse the request line and headers
     const [requestLine, ...headerLines] = header.split("\r\n");
     const [method, path] = requestLine.split(" ");
 
-    // ✅ Handle POST /files/{filename}
+    // Handle POST /files/{filename}
     if (method === "POST" && path.startsWith("/files/")) {
       const filename = path.replace("/files/", "");
       const filePath = path.join("/tmp", filename);
@@ -42,7 +42,7 @@ const server = net.createServer((socket) => {
       });
 
     } 
-    // ✅ Handle GET /files/{filename}
+    // Handle GET /files/{filename}
     else if (method === "GET" && path.startsWith("/files/")) {
       const filename = path.replace("/files/", "");
       const filePath = path.join("/tmp", filename);
@@ -62,7 +62,7 @@ const server = net.createServer((socket) => {
       });
 
     } 
-    // ✅ Handle invalid paths
+    // handle invalid paths
     else {
       const response = "HTTP/1.1 404 Not Found\r\n\r\n";
       socket.write(response);
@@ -70,7 +70,7 @@ const server = net.createServer((socket) => {
     }
   });
 
-  // ✅ Handle errors
+  // Handle errors
   socket.on("error", (err) => {
     console.error(`Socket error: ${err.message}`);
   });
@@ -80,7 +80,7 @@ const server = net.createServer((socket) => {
   });
 });
 
-// ✅ Start server
+// Start server
 const PORT = 4221;
 server.listen(PORT, "localhost", () => {
   console.log(`Server running at http://localhost:${PORT}`);
